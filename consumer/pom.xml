@@ -16,54 +16,19 @@
     </parent>
 
 
-    <dependencies>
+      <dependencies>
 
         <dependency>
             <groupId>com.tikal.amq.sc</groupId>
             <artifactId>common</artifactId>
         </dependency>
 
+        <!-- need this to proxy classes,otherwise spring can proxy only interfaces -->
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
         </dependency>
 
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
-
-
-        <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-        </dependency>
-
-
-        <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-core</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.geronimo.specs</groupId>
-                    <artifactId>geronimo-jms_1.1_spec</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-
-        <dependency>
-            <groupId>javax.jms</groupId>
-            <artifactId>jms</artifactId>
-        </dependency>
-
-
-     
 
         <!-- Test -->
         <dependency>
@@ -78,11 +43,7 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <scope>test</scope>
-        </dependency>
+
     </dependencies>
  
 </project>

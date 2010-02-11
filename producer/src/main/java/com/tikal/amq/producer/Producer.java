@@ -2,7 +2,6 @@ package com.tikal.amq.producer;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.jms.core.*;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.jms.*;
