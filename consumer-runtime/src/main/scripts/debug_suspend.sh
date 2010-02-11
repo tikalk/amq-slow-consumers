@@ -1,0 +1,7 @@
+
+XPR_DEBUG_PORT=8004
+export XPR_DEBUG_PORT
+SUSPEND_UNTIL_DEBUG_ATTACHE=y
+export SUSPEND_UNTIL_DEBUG_ATTACHE
+
+`dirname $0`/consumer.sh "$@"

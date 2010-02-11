@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.tikal.amq.sc</groupId>
+    <artifactId>server-runtime</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>server-runtime</name>
+
+
+    <properties>
+        <!-- to install to another location run maven with -Dserver-home=path to home -->
+        <server-home>${basedir}/home</server-home>
+    </properties>
+
+
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>com.tikal.amq.sc</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>com.tikal.amq.sc</groupId>
+            <artifactId>server</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+
+            <plugin>
+                <groupId>org.jvnet.maven-antrun-extended-plugin</groupId>
+                <artifactId>maven-antrun-extended-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                    <execution>
+                        <id>create-cmd-runtime</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+
+                                <copy toDir="${server-home}"
+                                      filtering="true"
+                                      preservelastmodified="true"
+                                      overwrite="true">
+                                    <fileset dir="." includes="src/main/**"
+                                             defaultexcludes="yes"/>
+                                    <compositemapper>
+                                        <globmapper from="src/main/scripts/*"
+                                                    to="bin/*"
+                                                    handledirsep="true"/>
+                                        <globmapper from="src/main/conf/*"
+                                                    to="conf/*"
+                                                    handledirsep="true"/>
+                                    </compositemapper>
+                                </copy>
+
+
+                                <chmod dir="${server-home}/bin/"
+                                       perm="ugo+rx"
+                                       includes="*.sh"/>
+                                
+                                <chmod dir="${server-home}/conf/"
+                                       perm="600"
+                                       includes="management-ssl.properties"/>
+
+                                <chmod dir="${server-home}/conf/"
+                                       perm="600"
+                                       includes="jmxremote.password"/>
+
+                            </tasks>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>create-cmd-dist</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <tar destfile="${server-home}/${artifactId}-${version}.tar.gz"
+                                     compression="gzip">
+                                    <tarfileset dir="${server-home}"
+                                                preserveLeadingSlashes="true">
+                                        <include name="conf/**/*"/>
+                                    </tarfileset>
+                                    <tarfileset dir="${server-home}"
+                                                preserveLeadingSlashes="true"
+                                                mode="755">
+                                        <include name="bin/**/*"/>
+                                    </tarfileset>
+                                    <tarfileset dir="${server-home}"
+                                                preserveLeadingSlashes="true">
+                                        <include name="lib/**/*"/>
+                                    </tarfileset>
+                                </tar>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${server-home}/lib
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+             <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${server-home}</directory>
+                            <includes>
+                                <include>**/*</include>
+                                <!--<include>bin/</include>-->
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            
+        </plugins>
+    </build>
+
+
+</project>

@@ -1,0 +1,52 @@
+monitoring AMQ with jconsole
+see:
+http://java.sun.com/javase/6/docs/technotes/guides/management/index.html
+http://www.builderau.com.au/program/java/soa/JConsole-remoting-notifications-and-log-control/0,339024620,339194480,00.htm
+http://www.componative.com/content/controller/developer/insights/jconsole2/index.html
+
+
+
+local monitoring is straightforward.
+TBD
+
+
+
+remote monitoring:
+TBD
+
+
+
+remote monitoring with ssl:
+
+generate key pair, see keytool docs.
+
+create a java management config file and set its location with jvm property:
+-Dcom.sun.management.config.file=<the-file>
+set all management properties in that file,
+see: server-runtime/src/main/conf/management.properties
+
+to enable rmi registry ssl set:
+com.sun.management.jmxremote.registry.ssl=true
+
+
+create a properties file for ssl ,
+see: server-runtime/src/main/conf/management-ssl.properties
+this file must be restricted to be read only by the user that
+started the application, so chmod 600 on that file.
+
+
+for use/pass authentication:
+create the jmxremote.password and jmxremote.access,
+see them in server-runtime/src/main/conf/
+in management.properties point to those files with:
+com.sun.management.jmxremote.password.file=
+com.sun.management.jmxremote.access.file=
+the password file should also be set to chmod 600
+
+
+start jconsole with required ssl properties,
+see: monitoring/run-jconsole.sh
+
+to debug jconsole connections create a logging properties file
+and start jconsole with: -J-Djava.util.logging.config.file=
+to debug ssl, start jconsole with: -J-Djavax.net.debug=ssl or =all

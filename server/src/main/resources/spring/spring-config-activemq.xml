@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+    <!--notes-->
+    <!--failover:tcp://host:port-->
+
+
+    <bean id="ActiveMQBroker" class="org.apache.activemq.xbean.BrokerFactoryBean">
+        <property name="config" value="classpath:activemq/activemq.xml"/>
+        <property name="start" value="true"/>
+    </bean>
+
+    <!-- configure a local vm connection factory, must be initialied after the broker.
+        see: http://activemq.apache.org/vm-transport-reference.html -->
+    <bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"
+          depends-on="ActiveMQBroker">
+         <!--the vm transport consist of the vm scheme and the broker's name -->
+        <property name="brokerURL" value="vm://AMQBroker?create=false&amp;waitForStart=1000"/>
+         <!--the user and password for VM transport, it is hard coded in VmTransportLoginModule -->
+        <!--<property name="userName" value="VMTransportUser"/>-->
+        <!--<property name="password" value="VMTransportPassword"/>-->
+    </bean>
+
+
+
+</beans>

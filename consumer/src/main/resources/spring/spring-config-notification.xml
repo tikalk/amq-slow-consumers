@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+
+    <!-- notifications -->
+    <bean id="notificationListenerContainer"
+          class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destinationName" value="${notification.topic}"/>
+        <property name="messageListener" ref="notificationListener"/>
+        <property name="pubSubDomain" value="true"/>
+        <property name="subscriptionDurable" value="${durable}"/>
+        <property name="durableSubscriptionName" value="consumerDurableSubscription"/>
+        <!-- this will cause the session to participate in
+   the DataSourceTransactionManager but its not xa transaction,
+    the jms session will be committed AFTER the jdbc connection was committed.
+    which is good for the consumer, if the DB commit failed the message will
+    remain in the queue -->
+        <!--<property name="sessionTransacted" value="true"/>-->
+        <!-- if the session is transacted the message acknowledge in handled in session commit -->
+        <!--<property name="sessionAcknowledgeMode">-->
+        <!--<util:constant static-field="javax.jms.Session.CLIENT_ACKNOWLEDGE"/>-->
+        <!--</property>-->
+
+        <!-- use this only for debugging, or start the listener yourself -->
+        <!--<property name="autoStartup" value="false"/>-->
+    </bean>
+
+
+    <bean id="notificationListener" class="com.tikal.amq.consumer.NotificationListener">
+    </bean>
+
+
+</beans>

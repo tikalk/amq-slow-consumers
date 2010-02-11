@@ -1,0 +1,331 @@
+<beans
+        xmlns="http://www.springframework.org/schema/beans"
+        xmlns:amq="http://activemq.apache.org/schema/core"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:util="http://www.springframework.org/schema/util"
+        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+                            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!--Allows us to use system properties as variables in this configuration file -->
+    <!-- unfortunately there are two locations for properties files,
+            under test resources for tests.
+            under command line for command line installation.
+            any new or changed property should be added to all files.
+     -->
+    <bean id="amqPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:amq.properties</value>
+            </list>
+        </property>
+        <!-- never use environment variables -->
+        <property name="searchSystemEnvironment" value="false"/>
+        <!-- allow system properties to override properties in files -->
+        <property name="systemPropertiesMode">
+            <util:constant
+                    static-field="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer.SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        </property>
+    </bean>
+
+
+    <broker xmlns="http://activemq.apache.org/schema/core"
+            brokerName="AMQBroker"
+            dataDirectory="${activemq-base}/data"
+            start="true"
+            useJmx="true">
+
+
+        <!-- Destination specific policies using destination names or wildcards -->
+        <destinationPolicy>
+            <policyMap>
+                <policyEntries>
+                    <policyEntry queue=">" memoryLimit="5mb"/>
+                    <policyEntry topic=">" memoryLimit="5mb">
+                        <!-- you can add other policies too such as these
+                          <dispatchPolicy>
+                              <strictOrderDispatchPolicy/>
+                          </dispatchPolicy>
+                          <subscriptionRecoveryPolicy>
+                              <lastImageSubscriptionRecoveryPolicy/>
+                          </subscriptionRecoveryPolicy>
+                        -->
+
+                    </policyEntry>
+                </policyEntries>
+            </policyMap>
+        </destinationPolicy>
+
+        <destinations>
+            <queue id="sourceQueue"
+                   physicalName="source.queue"/>
+            <!--<queue id="responseQueue"-->
+            <!--physicalName="response.queue"/>-->
+            <topic id="notificationTopic" 
+                   physicalName="notification.topic"/>
+
+        </destinations>
+
+
+        <!-- Use the following to configure how ActiveMQ is exposed in JMX -->
+        <managementContext>
+            <managementContext createConnector="false"/>
+        </managementContext>
+
+        <!--<messageAuthorizationPolicy>-->
+        <!--<bean class="com.correlix.integration.server.activemq.security.DNNameMessageAuthorizationPolicy"-->
+        <!--xmlns="http://www.springframework.org/schema/beans"/>-->
+        <!--</messageAuthorizationPolicy>-->
+
+
+        <plugins>
+            <!-- its possible to have a few security plugins, they will need different login configurations -->
+
+            <!-- jaasAuthenticationPlugin uses a plain users and groups properties files with activemq's PropertiesLoginModule -->
+            <!--<jaasAuthenticationPlugin configuration="${correlix.activemq.jass.login}"/>-->
+
+            <!-- we can't use activemq's jaasCertificateAuthenticationPlugin because we have a local VM transport
+                that we use internaly for routing, it tries to open a connection but jaasCertificateAuthenticationPlugin
+                does not support VM transaport,VM transport is not ssl and thus no certificates and the connection ettempt fails-->
+            <!--<jaasCertificateAuthenticationPlugin configuration="${correlix.activemq.jass.login}"/>-->
+
+            <!-- so we implemented a jaasCertificateAuthenticationPlugin that ignores VM transport.
+                the class name could be externalized to amq.properties if we need the option of changing the login plugin.
+                the plugin can be configured and mapped in different ways:
+                a regular spring bean outside the plugins section and a tag in the broker's tag: plugins="#loggingPlugin",
+                but this means that the plugins section is not usable.
+                because we probably need more plugins then defining the bean inside the plugins section is the only option left-->
+            <!--<bean xmlns="http://www.springframework.org/schema/beans"-->
+            <!--id="jaasCertificateAuthenticationPlugin"-->
+            <!--class="com.correlix.integration.server.activemq.security.JaasCertificateAuthenticationPluginIgnoreVM">-->
+            <!--<property name="configuration"-->
+            <!--value="${correlix.activemq.jaas.login}"/>-->
+            <!--</bean>-->
+
+            <!-- this authorization config tells activemq that:
+                 only connections from the group Customers can write to com.correlix.sharing.integ.queue
+                 only connections from the group VMTransportGroup can read from com.correlix.sharing.integ.queue
+                 only connections from the group Customers can read from com.correlix.sharing.input.queue
+                 only connections from the group VMTransportGroup can write to com.correlix.sharing.input.queue
+                 no one is authorized to creat queues or topics dynamically, to enable dynamic queues creation you have to add
+                 an authorizationEntrie like:
+                 <authorizationEntry queue="some queue name" read="Customers" write="Customers" admin="Customers"/>
+                 the queue name should not collaps with the unauthorized queue, you can't give write permissions
+                 to com.correlix.* because it is the same path as the two other queues.
+            -->
+            <!--<authorizationPlugin>-->
+            <!--<map>-->
+            <!--<authorizationMap>-->
+            <!--<authorizationEntries>-->
+            <!--<authorizationEntry-->
+            <!--queue="com.correlix.sharing.integ.queue"-->
+            <!--read="VMTransportGroup" write="Customers"/>-->
+            <!--<authorizationEntry-->
+            <!--queue="com.correlix.sharing.input.queue"-->
+            <!--read="Customers" write="VMTransportGroup"/>-->
+
+            <!--<authorizationEntry topic="ActiveMQ.Advisory.>"-->
+            <!--read="Customers,VMTransportGroup"-->
+            <!--write="Customers,VMTransportGroup"-->
+            <!--admin="Customers,VMTransportGroup"/>-->
+            <!--</authorizationEntries>-->
+
+            <!--</authorizationMap>-->
+            <!--</map>-->
+            <!--</authorizationPlugin>-->
+
+
+            <!-- enforce a security concern. the customer dn name is put on the correlix
+                message as the originating dn name so clients can not pretend as beeing someone else.
+                without this a correlix customer could write code that sends messages with another name on
+                the originatingDNName field of the message.
+                this will be enforced on any message sent to the queueName-->
+            <!--<bean xmlns="http://www.springframework.org/schema/beans"-->
+            <!--id="dnNameInterceptor"-->
+            <!--class="com.correlix.integration.server.activemq.plugins.DNNameInterceptorPlugin">-->
+            <!--<property name="queueName"-->
+            <!--value="com.correlix.sharing.integ.queue"/>-->
+            <!--</bean>-->
+        </plugins>
+
+
+        <!-- The store and forward broker networks ActiveMQ will listen to -->
+        <!--<networkConnectors>-->
+        <!-- by default just auto discover the other brokers -->
+        <!--<networkConnector name="default-nc" uri="multicast://default"/>-->
+        <!-- Example of a static configuration:
+        <networkConnector name="host1 and host2" uri="static://(tcp://host1:61616,tcp://host2:61616)"/>
+        -->
+        <!--</networkConnectors>-->
+
+        <!--<persistenceAdapter>-->
+        <!--<amqPersistenceAdapter syncOnWrite="false" directory="${activemq.base}/data" maxFileLength="20 mb"/>-->
+        <!--<kahaPersistenceAdapter dir="file:${activemq.base}" maxDataFileLength = "33554432" />-->
+        <!--</persistenceAdapter>-->
+
+        <!-- Use the following if you wish to configure the journal with JDBC -->
+        <!--
+        <persistenceAdapter>
+            <journaledJDBC dataDirectory="${activemq.base}/data" dataSource="#postgres-ds"/>
+        </persistenceAdapter>
+        -->
+
+        <!-- Or if you want to use pure JDBC without a journal -->
+        <!--
+        <persistenceAdapter>
+            <jdbcPersistenceAdapter dataSource="#postgres-ds"/>
+        </persistenceAdapter>
+        -->
+
+        <!--<sslContext>-->
+        <!--<sslContext keyStore="file:${activemq.base}/conf/broker.ks" keyStorePassword="password" trustStore="file:${activemq.base}/conf/broker.ts" trustStorePassword="password"/>-->
+        <!--</sslContext>-->
+
+        <!--  The maximum about of space the broker will use before slowing down producers -->
+        <!--<systemUsage>-->
+        <!--<systemUsage>-->
+        <!--<memoryUsage>-->
+        <!--<memoryUsage limit="20 mb"/>-->
+        <!--</memoryUsage>-->
+        <!--<storeUsage>-->
+        <!--<storeUsage limit="1 gb" name="foo"/>-->
+        <!--</storeUsage>-->
+        <!--<tempUsage>-->
+        <!--<tempUsage limit="100 mb"/>-->
+        <!--</tempUsage>-->
+        <!--</systemUsage>-->
+        <!--</systemUsage>-->
+
+        <!-- the ssl context, properties are in amq.properties.
+            to setup ssl with the jsse system properties comment this
+            and run the app with ssl system properties.
+             we currently use sslContext because its good for unit tests
+             where its harder to send system properties -->
+        <!--<sslContext>-->
+        <!--<sslContext id="sslContext" keyStoreType="JKS"-->
+        <!--keyStore="${correlix.activemq.server.keystore}"-->
+        <!--keyStorePassword="${correlix.activemq.server.keystore.password}"-->
+        <!--trustStore="${correlix.activemq.server.truststore}"-->
+        <!--trustStorePassword="${correlix.activemq.server.truststore.password}"/>-->
+        <!--</sslContext>-->
+
+
+        <!-- The transport connectors ActiveMQ will listen to -->
+        <!-- use  discoveryUri="multicast://default" to advertize the broker for other brokers -->
+        <transportConnectors>
+            <transportConnector name="${activemq.transport.name}"
+                                uri="${activemq.transport.uri}"/>
+            <!--<transportConnector name="ssl" uri="ssl://localhost:61617"/>-->
+            <!--<transportConnector name="stomp" uri="stomp://localhost:61613"/>-->
+            <!--<transportConnector name="xmpp" uri="xmpp://localhost:61222"/>-->
+        </transportConnectors>
+
+
+    </broker>
+
+    <!--
+    ** Lets deploy some Enterprise Integration Patterns inside the ActiveMQ Message Broker
+    ** For more details see
+    **
+    ** http://activemq.apache.org/enterprise-integration-patterns.html
+    -->
+    <!--<camelContext id="camel" xmlns="http://camel.apache.org/schema/spring">-->
+
+    <!-- You can use a <package> element for each root package to search for Java routes -->
+    <!--<package>org.foo.bar</package>-->
+
+    <!-- You can use Spring XML syntax to define the routes here using the <route> element -->
+    <!--<route>-->
+    <!--<from uri="activemq:example.A"/>-->
+    <!--<to uri="activemq:example.B"/>-->
+    <!--</route>-->
+    <!--</camelContext>-->
+
+    <!--
+    ** Lets configure some Camel endpoints
+    **
+    ** http://activemq.apache.org/camel/components.html
+    -->
+
+    <!-- configure the camel activemq component to use the current broker -->
+    <!--<bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent" >-->
+    <!--<property name="connectionFactory">-->
+    <!--<bean class="org.apache.activemq.ActiveMQConnectionFactory">-->
+    <!--<property name="brokerURL" value="vm://localhost?create=false&amp;waitForStart=10000" />-->
+    <!--<property name="userName" value="${activemq.username}"/>-->
+    <!--<property name="password" value="${activemq.password}"/>-->
+    <!--</bean>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+
+    <!-- Uncomment to create a command agent to respond to message based admin commands on the ActiveMQ.Agent topic -->
+    <!--
+    <commandAgent xmlns="http://activemq.apache.org/schema/core" brokerUrl="vm://localhost" username="${activemq.username}" password="${activemq.password}"/>
+    -->
+
+
+    <!-- An embedded servlet engine for serving up the Admin console -->
+    <!--<jetty xmlns="http://mortbay.com/schemas/jetty/1.0">-->
+    <!--<connectors>-->
+    <!--<nioConnector port="8161"/>-->
+    <!--</connectors>-->
+
+    <!--<handlers>-->
+    <!--<webAppContext contextPath="/admin" resourceBase="${activemq.base}/webapps/admin" logUrlOnStart="true"/>-->
+    <!--<webAppContext contextPath="/camel" resourceBase="${activemq.base}/webapps/camel" logUrlOnStart="true"/>-->
+    <!--<webAppContext contextPath="/demo" resourceBase="${activemq.base}/webapps/demo" logUrlOnStart="true"/>-->
+    <!--<webAppContext contextPath="/fileserver" resourceBase="${activemq.base}/webapps/fileserver" logUrlOnStart="true"/>-->
+    <!--</handlers>-->
+    <!--</jetty>-->
+
+    <!--  This xbean configuration file supports all the standard spring xml configuration options -->
+
+    <!-- Postgres DataSource Sample Setup -->
+    <!--
+    <bean id="postgres-ds" class="org.postgresql.ds.PGPoolingDataSource">
+      <property name="serverName" value="localhost"/>
+      <property name="databaseName" value="activemq"/>
+      <property name="portNumber" value="0"/>
+      <property name="user" value="activemq"/>
+      <property name="password" value="activemq"/>
+      <property name="dataSourceName" value="postgres"/>
+      <property name="initialConnections" value="1"/>
+      <property name="maxConnections" value="10"/>
+    </bean>
+    -->
+
+    <!-- MySql DataSource Sample Setup -->
+    <!--
+    <bean id="mysql-ds" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+      <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+      <property name="url" value="jdbc:mysql://localhost/activemq?relaxAutoCommit=true"/>
+      <property name="username" value="activemq"/>
+      <property name="password" value="activemq"/>
+      <property name="maxActive" value="200"/>
+      <property name="poolPreparedStatements" value="true"/>
+    </bean>
+    -->
+
+    <!-- Oracle DataSource Sample Setup -->
+    <!--
+    <bean id="oracle-ds" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+      <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+      <property name="url" value="jdbc:oracle:thin:@localhost:1521:AMQDB"/>
+      <property name="username" value="scott"/>
+      <property name="password" value="tiger"/>
+      <property name="maxActive" value="200"/>
+      <property name="poolPreparedStatements" value="true"/>
+    </bean>
+    -->
+
+    <!-- Embedded Derby DataSource Sample Setup -->
+    <!--
+    <bean id="derby-ds" class="org.apache.derby.jdbc.EmbeddedDataSource">
+      <property name="databaseName" value="derbydb"/>
+      <property name="createDatabase" value="create"/>
+    </bean>
+    -->
+
+</beans>

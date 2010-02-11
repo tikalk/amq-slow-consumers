@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.tikal.amq.sc</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>slow consumers: parent</name>
+
+
+    <modules>
+        <module>common</module>
+        <module>server</module>
+        <module>server-runtime</module>
+        <module>producer</module>
+        <module>producer-runtime</module>
+        <module>consumer</module>
+        <module>consumer-runtime</module>
+    </modules>
+
+
+    <repositories>
+        <repository>
+            <id>jboss</id>
+            <url>http://repository.jboss.com/maven2</url>
+        </repository>
+        <repository>
+            <id>atomikos</id>
+            <url>http://repo.atomikos.com</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven2.java.net</id>
+            <name>Java.net Repository for Maven 2</name>
+            <url>http://download.java.net/maven/2</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <!--<profiles>-->
+    <!--<profile>-->
+    <!--<id>commandLine</id>-->
+    <!--<modules>-->
+    <!--<module>commandline</module>-->
+    <!--</modules>-->
+    <!--</profile>-->
+    <!--<profile>-->
+    <!--<id>web</id>-->
+    <!--<modules>-->
+    <!--<module>web</module>-->
+    <!--</modules>-->
+    <!--</profile>-->
+    <!---->
+    <!--</profiles>-->
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+
+
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-surefire-plugin</artifactId>-->
+            <!--<configuration>-->
+            <!--TODO remove enableAssertions-->
+            <!--<enableAssertions>true</enableAssertions>-->
+            <!--<includes>-->
+            <!--<include>**/*Test.java</include>-->
+            <!--</includes>-->
+            <!--<testFailureIgnore>false</testFailureIgnore>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
+        </plugins>
+
+    </build>
+
+
+    <dependencyManagement>
+        <dependencies>
+
+
+            <!-- TEST dependencies -->
+            <dependency>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>1.8.0.7</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.4</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>2.5.6</version>
+                <scope>test</scope>
+            </dependency>
+
+
+            <!-- runtime dependencies -->
+
+
+            <dependency>
+                <groupId>com.tikal.amq.sc</groupId>
+                <artifactId>common</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>1.5.8</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>2.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-spring</artifactId>
+                <version>3.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>3.3.1.GA</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javassist</groupId>
+                <artifactId>javassist</artifactId>
+                <version>3.8.0.GA</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-dbcp</groupId>
+                <artifactId>commons-dbcp</artifactId>
+                <version>1.2.2</version>
+            </dependency>
+
+            <dependency>
+                <groupId>c3p0</groupId>
+                <artifactId>c3p0</artifactId>
+                <version>0.9.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>8.3-603.jdbc3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring</artifactId>
+                <version>2.5.6</version>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib-nodep</artifactId>
+                <version>2.2</version>
+            </dependency>
+
+            <!--<dependency>-->
+            <!--<groupId>org.springframework.integration</groupId>-->
+            <!--<artifactId>spring-integration-core</artifactId>-->
+            <!--<version>1.0.2.RELEASE</version>-->
+            <!--</dependency>-->
+            <!--<dependency>-->
+            <!--<groupId>org.springframework.integration</groupId>-->
+            <!--<artifactId>spring-integration-jms</artifactId>-->
+            <!--<version>1.0.2.RELEASE</version>-->
+            <!--</dependency>-->
+
+            <dependency>
+                <groupId>javax.jms</groupId>
+                <artifactId>jms</artifactId>
+                <version>1.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.activemq</groupId>
+                <artifactId>activemq-core</artifactId>
+                <version>5.3.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>5.1.6</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>javax.transaction</groupId>
+                <artifactId>jta</artifactId>
+                <version>1.1</version>
+            </dependency>
+
+
+            <!-- Atomikos -->
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jms</artifactId>
+                <version>3.5.9</version>
+            </dependency>
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jdbc</artifactId>
+                <version>3.5.9</version>
+            </dependency>
+
+            <!-- Bitronix -->
+            <dependency>
+                <groupId>org.codehaus.btm</groupId>
+                <artifactId>btm</artifactId>
+                <version>1.3.3</version>
+            </dependency>
+
+
+        </dependencies>
+
+    </dependencyManagement>
+
+
+</project>

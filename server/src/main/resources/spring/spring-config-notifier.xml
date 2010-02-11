@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+    <bean id="timerFactory"
+          class="org.springframework.scheduling.timer.TimerFactoryBean"
+            depends-on="connectionFactory">
+        <property name="scheduledTimerTasks">
+            <list>
+                <ref bean="scheduledNotification"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="scheduledNotification"
+          class="org.springframework.scheduling.timer.ScheduledTimerTask">
+        <property name="period" value="${notification-interval}"/>
+        <property name="timerTask" ref="notifier"/>
+    </bean>
+
+    <bean id="notifier" class="com.tikal.amq.server.Notifier">
+        <property name="jmsTemplate">
+            <bean id="jmsTemplate"
+                  class="org.springframework.jms.core.JmsTemplate">
+                <property name="connectionFactory" ref="connectionFactory"/>
+                <property name="defaultDestinationName" value="${notification.topic}"/>
+                <property name="pubSubDomain" value="true"/>
+                <!-- need persistent true to anable durable subscriptions
+                    see: http://activemq.apache.org/why-do-i-not-receive-messages-on-my-durable-topic-subscription.html-->
+                <property name="deliveryPersistent" value="true"/>
+            </bean>
+        </property>
+    </bean>
+
+
+</beans>
