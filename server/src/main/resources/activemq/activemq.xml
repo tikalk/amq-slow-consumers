@@ -74,7 +74,7 @@
         </managementContext>
 
         <!--<messageAuthorizationPolicy>-->
-        <!--<bean class="com.correlix.integration.server.activemq.security.DNNameMessageAuthorizationPolicy"-->
+        <!--<bean class="com.tikal.integration.server.activemq.security.DNNameMessageAuthorizationPolicy"-->
         <!--xmlns="http://www.springframework.org/schema/beans"/>-->
         <!--</messageAuthorizationPolicy>-->
 
@@ -83,12 +83,12 @@
             <!-- its possible to have a few security plugins, they will need different login configurations -->
 
             <!-- jaasAuthenticationPlugin uses a plain users and groups properties files with activemq's PropertiesLoginModule -->
-            <!--<jaasAuthenticationPlugin configuration="${correlix.activemq.jass.login}"/>-->
+            <!--<jaasAuthenticationPlugin configuration="${tikal.activemq.jass.login}"/>-->
 
             <!-- we can't use activemq's jaasCertificateAuthenticationPlugin because we have a local VM transport
                 that we use internaly for routing, it tries to open a connection but jaasCertificateAuthenticationPlugin
                 does not support VM transaport,VM transport is not ssl and thus no certificates and the connection ettempt fails-->
-            <!--<jaasCertificateAuthenticationPlugin configuration="${correlix.activemq.jass.login}"/>-->
+            <!--<jaasCertificateAuthenticationPlugin configuration="${tikal.activemq.jass.login}"/>-->
 
             <!-- so we implemented a jaasCertificateAuthenticationPlugin that ignores VM transport.
                 the class name could be externalized to amq.properties if we need the option of changing the login plugin.
@@ -98,31 +98,31 @@
                 because we probably need more plugins then defining the bean inside the plugins section is the only option left-->
             <!--<bean xmlns="http://www.springframework.org/schema/beans"-->
             <!--id="jaasCertificateAuthenticationPlugin"-->
-            <!--class="com.correlix.integration.server.activemq.security.JaasCertificateAuthenticationPluginIgnoreVM">-->
+            <!--class="com.tikal.integration.server.activemq.security.JaasCertificateAuthenticationPluginIgnoreVM">-->
             <!--<property name="configuration"-->
-            <!--value="${correlix.activemq.jaas.login}"/>-->
+            <!--value="${tikal.activemq.jaas.login}"/>-->
             <!--</bean>-->
 
             <!-- this authorization config tells activemq that:
-                 only connections from the group Customers can write to com.correlix.sharing.integ.queue
-                 only connections from the group VMTransportGroup can read from com.correlix.sharing.integ.queue
-                 only connections from the group Customers can read from com.correlix.sharing.input.queue
-                 only connections from the group VMTransportGroup can write to com.correlix.sharing.input.queue
+                 only connections from the group Customers can write to com.tikal.sharing.integ.queue
+                 only connections from the group VMTransportGroup can read from com.tikal.sharing.integ.queue
+                 only connections from the group Customers can read from com.tikal.sharing.input.queue
+                 only connections from the group VMTransportGroup can write to com.tikal.sharing.input.queue
                  no one is authorized to creat queues or topics dynamically, to enable dynamic queues creation you have to add
                  an authorizationEntrie like:
                  <authorizationEntry queue="some queue name" read="Customers" write="Customers" admin="Customers"/>
                  the queue name should not collaps with the unauthorized queue, you can't give write permissions
-                 to com.correlix.* because it is the same path as the two other queues.
+                 to com.tikal.* because it is the same path as the two other queues.
             -->
             <!--<authorizationPlugin>-->
             <!--<map>-->
             <!--<authorizationMap>-->
             <!--<authorizationEntries>-->
             <!--<authorizationEntry-->
-            <!--queue="com.correlix.sharing.integ.queue"-->
+            <!--queue="com.tikal.sharing.integ.queue"-->
             <!--read="VMTransportGroup" write="Customers"/>-->
             <!--<authorizationEntry-->
-            <!--queue="com.correlix.sharing.input.queue"-->
+            <!--queue="com.tikal.sharing.input.queue"-->
             <!--read="Customers" write="VMTransportGroup"/>-->
 
             <!--<authorizationEntry topic="ActiveMQ.Advisory.>"-->
@@ -136,16 +136,16 @@
             <!--</authorizationPlugin>-->
 
 
-            <!-- enforce a security concern. the customer dn name is put on the correlix
+            <!-- enforce a security concern. the customer dn name is put on the
                 message as the originating dn name so clients can not pretend as beeing someone else.
-                without this a correlix customer could write code that sends messages with another name on
+                without this a customer could write code that sends messages with another name on
                 the originatingDNName field of the message.
                 this will be enforced on any message sent to the queueName-->
             <!--<bean xmlns="http://www.springframework.org/schema/beans"-->
             <!--id="dnNameInterceptor"-->
-            <!--class="com.correlix.integration.server.activemq.plugins.DNNameInterceptorPlugin">-->
+            <!--class="com.tikal.integration.server.activemq.plugins.DNNameInterceptorPlugin">-->
             <!--<property name="queueName"-->
-            <!--value="com.correlix.sharing.integ.queue"/>-->
+            <!--value="com.tikal.sharing.integ.queue"/>-->
             <!--</bean>-->
         </plugins>
 
@@ -204,10 +204,10 @@
              where its harder to send system properties -->
         <!--<sslContext>-->
         <!--<sslContext id="sslContext" keyStoreType="JKS"-->
-        <!--keyStore="${correlix.activemq.server.keystore}"-->
-        <!--keyStorePassword="${correlix.activemq.server.keystore.password}"-->
-        <!--trustStore="${correlix.activemq.server.truststore}"-->
-        <!--trustStorePassword="${correlix.activemq.server.truststore.password}"/>-->
+        <!--keyStore="${tikal.activemq.server.keystore}"-->
+        <!--keyStorePassword="${tikal.activemq.server.keystore.password}"-->
+        <!--trustStore="${tikal.activemq.server.truststore}"-->
+        <!--trustStorePassword="${tikal.activemq.server.truststore.password}"/>-->
         <!--</sslContext>-->
 
 

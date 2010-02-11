@@ -8,7 +8,7 @@
 #the default argument is the name of a properties file that contains jvm arguments,it is parsed
 #by setenv and sent to the jvm, configure jvm arguments there.
 
-source `dirname $0`/setenv.sh default
+source `dirname $0`/setenv.sh startup
 
 
 echo 'program arguments:'
