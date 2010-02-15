@@ -1,3 +1,20 @@
 monitoring activemq
 
 
+JMX monitoring:
+first thing is to enable JMX by setting useJmx="true" in the broker configuration.
+or add that to the broker url as ?useJmx=true
+
+use <managementContext> to configure JMX in amq
+see this:
+http://activemq.apache.org/jmx.html#JMX-ManagementContextPropertiesReference
+
+add connectorPort="2011" to add a JMX connector.
+and when starting the server look for the message:
+"JMX consoles can connect to service:jmx:rmi:///jndi/rmi://localhost:2011/jmxrmi"
+
+
+the property java.rmi.server.hostname tell the RMI the host name to
+bind to, so setting that to localhost will restrict access from localhost only.
+
+

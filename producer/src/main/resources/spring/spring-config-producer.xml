@@ -18,15 +18,16 @@
 
 
     <bean id="producer" class="com.tikal.amq.producer.Producer">
-        <property name="jmsTemplate" ref="jmsTemplate"/>
+        <property name="jmsTemplate">
+            <bean class="org.springframework.jms.core.JmsTemplate">
+                <property name="connectionFactory" ref="connectionFactory"/>
+                <property name="defaultDestinationName" value="${sample.source.queue}"/>
+                <property name="explicitQosEnabled" value="true"/>
+                <property name="timeToLive" value="${producer.timeToLive}"/>
+            </bean>
+        </property>
     </bean>
 
-
-
-    <bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
-        <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="defaultDestinationName" value="${source.queue}"/>
-    </bean>
 
     <bean id="connectionFactory"
           class="org.springframework.jms.connection.CachingConnectionFactory">
@@ -34,12 +35,14 @@
             <bean class="org.apache.activemq.ActiveMQConnectionFactory">
                 <property name="brokerURL"
                           value="${broker.url}"/>
+                <property name="userName" value="${amq.user.name}"/>
+                <property name="password" value="${amq.user.pass}"/>
             </bean>
         </property>
         <property name="sessionCacheSize" value="10"/>
         <property name="cacheProducers" value="false"/>
     </bean>
-    
+
 
     <bean id="propertyPlaceholder"
           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">

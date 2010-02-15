@@ -26,7 +26,7 @@
             <bean id="jmsTemplate"
                   class="org.springframework.jms.core.JmsTemplate">
                 <property name="connectionFactory" ref="connectionFactory"/>
-                <property name="defaultDestinationName" value="${notification.topic}"/>
+                <property name="defaultDestinationName" value="${sample.notification.topic}"/>
                 <property name="pubSubDomain" value="true"/>
                 <!-- need persistent true to anable durable subscriptions
                     see: http://activemq.apache.org/why-do-i-not-receive-messages-on-my-durable-topic-subscription.html-->

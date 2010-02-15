@@ -1,6 +1,7 @@
 package com.tikal.amq.producer;
 
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jms.core.*;
 
 import javax.annotation.PostConstruct;
@@ -19,6 +20,7 @@ public class Producer {
     private JmsTemplate jmsTemplate;
 
 
+    @Required
     public void setJmsTemplate(JmsTemplate jmsTemplate) {
         this.jmsTemplate = jmsTemplate;
     }
@@ -34,7 +36,7 @@ public class Producer {
 
         final Date date = new Date();
         LoggerFactory.getLogger(getClass()).debug("Sending a message at "+date);
-        
+
         jmsTemplate.send(new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 Message message = session.createTextMessage("Message from producer at "+date);

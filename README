@@ -6,14 +6,14 @@ and how to monitor activemq with jmx.
 
 
 The server starts an ActiveMQ broker.
-It has a notifier service that sends a notification to a notification.topic
+It has a notifier service that sends a notification to a sample.notification.topic
 every some interval.
 
 
-The producer simply runs in a loop and send a message to a queue 'source.queue'
+The producer simply runs in a loop and send a message to a queue 'sample.source.queue'
 every some interval.
-it has a notification listener that listens for notification on the notification.topic.
+it has a notification listener that listens for notification on the sample.notification.topic.
 
 
-The consumer listens to the 'source.queue' and prints the arriving messages.
+The consumer listens to the 'sample.source.queue' and prints the arriving messages.
 it also has a notification listener.

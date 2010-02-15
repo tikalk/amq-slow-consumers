@@ -12,7 +12,7 @@
     <bean id="consumerListenerContainer"
           class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="destinationName" value="${source.queue}"/>
+        <property name="destinationName" value="${sample.source.queue}"/>
         <property name="messageListener" ref="consumerListener"/>
         <!-- this will cause the session to participate in
             the DataSourceTransactionManager but its not xa transaction,
@@ -42,6 +42,8 @@
             <bean class="org.apache.activemq.ActiveMQConnectionFactory">
                 <property name="brokerURL"
                           value="${broker.url}"/>
+                <property name="userName" value="${amq.user.name}"/>
+                <property name="password" value="${amq.user.pass}"/>
             </bean>
         </property>
         <property name="sessionCacheSize" value="10"/>

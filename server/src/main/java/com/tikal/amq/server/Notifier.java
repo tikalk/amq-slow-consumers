@@ -27,7 +27,9 @@ public class Notifier extends TimerTask{
             public Message createMessage(Session session) throws JMSException {
                 String date = new Date().toString();
                 LoggerFactory.getLogger(getClass()).debug("Sending notification at "+date);
-                return session.createTextMessage("Notification at "+date);
+                Message message = session.createTextMessage("Notification at "+date);
+                message.setJMSDeliveryMode(DeliveryMode.NON_PERSISTENT);
+                return message;
             }
         });
     }

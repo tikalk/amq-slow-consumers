@@ -21,8 +21,8 @@
          <!--the vm transport consist of the vm scheme and the broker's name -->
         <property name="brokerURL" value="vm://AMQBroker?create=false&amp;waitForStart=1000"/>
          <!--the user and password for VM transport, it is hard coded in VmTransportLoginModule -->
-        <!--<property name="userName" value="VMTransportUser"/>-->
-        <!--<property name="password" value="VMTransportPassword"/>-->
+        <property name="userName" value="${amq.user.name}"/>
+        <property name="password" value="${amq.user.pass}"/>
     </bean>
 
 

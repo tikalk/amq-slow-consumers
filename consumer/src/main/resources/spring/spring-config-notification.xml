@@ -9,7 +9,7 @@
     <bean id="notificationListenerContainer"
           class="org.springframework.jms.listener.DefaultMessageListenerContainer">
         <property name="connectionFactory" ref="connectionFactory"/>
-        <property name="destinationName" value="${notification.topic}"/>
+        <property name="destinationName" value="${sample.notification.topic}"/>
         <property name="messageListener" ref="notificationListener"/>
         <property name="pubSubDomain" value="true"/>
         <property name="subscriptionDurable" value="${durable}"/>

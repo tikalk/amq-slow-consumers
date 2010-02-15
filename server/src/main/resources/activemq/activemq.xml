@@ -34,7 +34,9 @@
             brokerName="AMQBroker"
             dataDirectory="${activemq-base}/data"
             start="true"
-            useJmx="true">
+            useJmx="true"
+            advisorySupport="true">
+
 
 
         <!-- Destination specific policies using destination names or wildcards -->
@@ -53,25 +55,63 @@
                         -->
 
                     </policyEntry>
+
+                    <!-- send advisory for messages sent with no consumers -->
+                    <!--<policyEntry topic=">"-->
+                    <!--sendAdvisoryIfNoConsumers="true"/>-->
+
+                    <!--<policyEntry queue=">">-->
+                        <!--<deadLetterStrategy>-->
+                            <!--<sharedDeadLetterStrategy processExpired="true"-->
+                                                      <!--processNonPersistent="true"/>-->
+                        <!--</deadLetterStrategy>-->
+                    <!--</policyEntry>-->
+                    <!-- DO NOT COMMENT INSIDE THE POLICY ENTRY -->
+                    <policyEntry queue="sample.>">
+                        <deadLetterStrategy>
+                            <individualDeadLetterStrategy
+                                    queuePrefix="ActiveMQ.DLQ.queue."
+                                    topicPrefix="ActiveMQ.DLQ.topic."
+                                    useQueueForQueueMessages="true"
+                                    useQueueForTopicMessages="true"
+                                    processExpired="true"
+                                    processNonPersistent="true"/>
+                        </deadLetterStrategy>
+                    </policyEntry>
                 </policyEntries>
             </policyMap>
         </destinationPolicy>
 
+
+
         <destinations>
             <queue id="sourceQueue"
-                   physicalName="source.queue"/>
+                   physicalName="sample.source.queue"/>
             <!--<queue id="responseQueue"-->
             <!--physicalName="response.queue"/>-->
-            <topic id="notificationTopic" 
-                   physicalName="notification.topic"/>
+            <topic id="notificationTopic"
+                   physicalName="sample.notification.topic"/>
 
         </destinations>
 
 
+        
         <!-- Use the following to configure how ActiveMQ is exposed in JMX -->
         <managementContext>
             <managementContext createConnector="false"/>
         </managementContext>
+        <!--<managementContext>-->
+        <!--<managementContext jmxDomainName="my-amq-domain-name"/>-->
+        <!--</managementContext>-->
+        <!--<managementContext>-->
+        <!--<managementContext createConnector="true"-->
+        <!--useMBeanServer="false"-->
+        <!--connectorPort="2011"-->
+        <!--jmxDomainName="my-amq-domain"-->
+        <!--connectorPath="jmxrmi"-->
+        <!--connectorHost="shalom-laptop"-->
+        <!--/>-->
+        <!--</managementContext>-->
 
         <!--<messageAuthorizationPolicy>-->
         <!--<bean class="com.tikal.integration.server.activemq.security.DNNameMessageAuthorizationPolicy"-->
@@ -80,6 +120,74 @@
 
 
         <plugins>
+
+            <!--<timeStampingBrokerPlugin/>-->
+
+
+            <simpleAuthenticationPlugin>
+                <users>
+                    <authenticationUser username="admin" password="admin"
+                                        groups="users,admins"/>
+                    <authenticationUser username="shalom" password="shalom"
+                                        groups="users"/>
+                    <authenticationUser username="guest" password="guest"
+                                        groups="guests"/>
+                </users>
+            </simpleAuthenticationPlugin>
+
+            <!-- NOTE, when this authorization is enabled, advisory
+                message for expired messages fail.
+                also, with authorization on queues the broker can't send
+                expired messages to DLQ, see: https://issues.apache.org/activemq/browse/AMQ-2516 
+            -->
+            <!--<authorizationPlugin>-->
+                <!--<map>-->
+                    <!--<authorizationMap>-->
+                        <!--<authorizationEntries>-->
+                            <!--<authorizationEntry queue=">" read="admins"-->
+                                                <!--write="admins" admin="admins"/>-->
+                            <!--<authorizationEntry queue="sample.>"-->
+                                                <!--read="users,guests,admins"-->
+                                                <!--write="users,admins"-->
+                                                <!--admin="admins"/>-->
+                            <!--<authorizationEntry queue="ActiveMQ.DLQ.queue.>"-->
+                                                <!--read="users,guests,admins"-->
+                                                <!--write="users,guests,admins"-->
+                                                <!--admin="admins,users,guests"/>-->
+                            <!--<authorizationEntry queue="ActiveMQ.DLQ.topic.>"-->
+                                                <!--read="users,guests,admins"-->
+                                                <!--write="users,guests,admins"-->
+                                                <!--admin="admins,users,guests"/>-->
+
+                            <!--<authorizationEntry topic=">" read="admins"-->
+                                                <!--write="admins" admin="admins"/>-->
+                            <!--<authorizationEntry topic="sample.>"-->
+                                                <!--read="users,guests,admins"-->
+                                                <!--write="users,admins"-->
+                                                <!--admin="admins"/>-->
+
+                            <!--<authorizationEntry topic="ActiveMQ.Advisory.>"-->
+                                                <!--read="guests,users,admins"-->
+                                                <!--write="guests,users,admins"-->
+                                                <!--admin="guests,users,admins"/>-->
+                        <!--</authorizationEntries>-->
+
+                        <!--&lt;!&ndash; let's assign roles to temporary destinations. comment this entry if we don't want any roles assigned to temp destinations  &ndash;&gt;-->
+                        <!--&lt;!&ndash;<tempDestinationAuthorizationEntry>&ndash;&gt;-->
+                        <!--&lt;!&ndash;<tempDestinationAuthorizationEntry&ndash;&gt;-->
+                        <!--&lt;!&ndash;read="tempDestinationAdmins"&ndash;&gt;-->
+                        <!--&lt;!&ndash;write="tempDestinationAdmins"&ndash;&gt;-->
+                        <!--&lt;!&ndash;admin="tempDestinationAdmins"/>&ndash;&gt;-->
+                        <!--&lt;!&ndash;</tempDestinationAuthorizationEntry>&ndash;&gt;-->
+                        <!--<tempDestinationAuthorizationEntry>-->
+                            <!--<tempDestinationAuthorizationEntry read="admin,users"-->
+                                                               <!--write="admin,users"-->
+                                                               <!--admin="admin,users"/>-->
+                        <!--</tempDestinationAuthorizationEntry>-->
+                    <!--</authorizationMap>-->
+                <!--</map>-->
+            <!--</authorizationPlugin>-->
+
             <!-- its possible to have a few security plugins, they will need different login configurations -->
 
             <!-- jaasAuthenticationPlugin uses a plain users and groups properties files with activemq's PropertiesLoginModule -->
@@ -147,6 +255,10 @@
             <!--<property name="queueName"-->
             <!--value="com.tikal.sharing.integ.queue"/>-->
             <!--</bean>-->
+
+
+            <!-- NOTE: if loggingBrokerPlugin plugin is enabled DLQ will not work -->
+            <!--<loggingBrokerPlugin logAll="true"/>-->
         </plugins>
 
 

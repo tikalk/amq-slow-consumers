@@ -1,0 +1,29 @@
+to configure DLQ:
+
+
+
+Known bugs:
+for AMQ 5.3, if using loggingBrokerPlugin DLQ will not work,messages will not be sent to DLQ.
+see: http://old.nabble.com/LoggingBrokerPlugin-and-DLQ-td27588791.html
+for AMQ 5.3, if authorization is configured for queues then the broker will not be able to
+send messages to DLQ,
+see:https://issues.apache.org/activemq/browse/AMQ-2516
+in AMQ 5.2, expired messages are not moved from the queue,
+see:http://issues.apache.org/activemq/browse/AMQ-1796
+although it should be fixed in 5.2 it still doesn't work.
+
+
+
+configuration for 5.3, currently works only if there is no authorization for queues.
+
+if no DeadLetterStrategy is configured the default is sharedDeadLetterStrategy.
+
+you can configure DeadLetterStrategy in the policy map.
+
+make sure users have permissions to the the DLQ.
+
+
+how its implemented in this sample:
+the producer is configured with a timeToLive property, see the jmsTemplate
+injected to the producer, default is 0, messages do not expire.
+and configured deadLetterStrategy for activemq with processExpired="true"

@@ -105,7 +105,7 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.4</version>
+                <version>4.7</version>
                 <scope>test</scope>
             </dependency>
 
@@ -260,11 +260,11 @@
                 <artifactId>activemq-core</artifactId>
                 <version>5.3.0</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>org.apache.geronimo.specs</groupId>
-                        <artifactId>geronimo-j2ee-management_1.0_spec
-                        </artifactId>
-                    </exclusion>
+                    <!--<exclusion>-->
+                        <!--<groupId>org.apache.geronimo.specs</groupId>-->
+                        <!--<artifactId>geronimo-j2ee-management_1.0_spec-->
+                        <!--</artifactId>-->
+                    <!--</exclusion>-->
                     <exclusion>
                         <groupId>commons-logging</groupId>
                         <artifactId>commons-logging-api</artifactId>
