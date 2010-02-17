@@ -4,6 +4,7 @@ import org.apache.activemq.broker.jmx.*;
 
 import javax.management.*;
 import javax.management.remote.*;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,12 +15,19 @@ import javax.management.remote.*;
 public class Stats {
     public static void main(String[] args) throws Exception {
         JMXServiceURL url = new JMXServiceURL(
-                "service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi");
-        JMXConnector connector = JMXConnectorFactory.connect(url, null);
+                "service:jmx:rmi:///jndi/rmi://localhost:8999/jmxrmi");
+
+
+        String[] credentials = {"controlRole", "cpass"};
+        Map env = new HashMap();
+        env.put(JMXConnector.CREDENTIALS,credentials);
+        
+        JMXConnector connector = JMXConnectorFactory.connect(url, env);
+        
         connector.connect();
         MBeanServerConnection connection = connector.getMBeanServerConnection();
         ObjectName name = new ObjectName(
-                "my-amq-domain-name:BrokerName=AMQBroker,Type=Broker");
+                "org.apache.activemq:BrokerName=AMQBroker,Type=Broker");
         BrokerViewMBean mbean = (BrokerViewMBean) MBeanServerInvocationHandler
                 .newProxyInstance(connection, name, BrokerViewMBean.class, true);
         System.out.println("Statistics for broker " + mbean.getBrokerId()
